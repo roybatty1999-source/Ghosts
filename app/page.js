@@ -1,6 +1,29 @@
+'use client';
+import { useState, useEffect } from 'react';
+
 export default function Dashboard() {
+  const [signalList, setSignalList] = useState([]);
+
+  useEffect(() => {
+    const fetchSignals = async () => {
+      try {
+        const response = await fetch('/api/webhook');
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setSignalList(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchSignals();
+    const intervalId = setInterval(fetchSignals, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
-    <main style={{ padding: '1.5rem', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+    <main style={{ padding: '1.5rem', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111' }}>Breakout & Bias Dashboard</h1>
       <p style={{ color: '#666', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Monitoraggio in tempo reale dei segnali di TradingView</p>
       
@@ -15,14 +38,22 @@ export default function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            <tr style={{ borderBottom: '1px solid #eaeaea' }}>
-              <td style={{ padding: '12px 16px', color: '#666' }}>In attesa di segnali...</td>
-              <td style={{ padding: '12px 16px', fontWeight: '500' }}>-</td>
-              <td style={{ padding: '12px 16px', color: '#666' }}>-</td>
-              <td style={{ padding: '12px 16px', color: '#666' }}>-</td>
-            </tr>
+            {signalList.length === 0 ? (
+              <tr>
+                <td colSpan="4" style={{ padding: '16px', textAlign: 'center', color: '#666' }}>In attesa di segnali...</td>
+              </tr>
+            ) : (
+              signalList.map((item, index) => (
+                <tr key={index} style={{ borderBottom: '1px solid #eaeaea' }}>
+                  <td style={{ padding: '12px 16px', color: '#333' }}>{item.time}</td>
+                  <td style={{ padding: '12px 16px', fontWeight: '600' }}>{item.symbol}</td>
+                  <td style={{ padding: '12px 16px', color: '#666' }}>{item.exchange}</td>
+                  <td style={{ padding: '12px 16px', color: '#666' }}>{item.price}</td>
+                </tr>
+              ))
+            )}
           </tbody>
-        </table>
+        </table>>
       </div>
     </main>
   );
