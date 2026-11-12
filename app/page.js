@@ -53,7 +53,7 @@ export default function Dashboard() {
               ))
             )}
           </tbody>
-        </table>>
+        </table>
       </div>
     </main>
   );
