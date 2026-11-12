@@ -24,7 +24,7 @@ export default function Dashboard() {
 
   return (
     <main style={{ padding: '1.5rem', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111' }}>Breakout & Bias Dashboard</h1>
+      <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111' }}>Siberiani</h1>
       <p style={{ color: '#666', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Monitoraggio in tempo reale dei segnali di TradingView</p>
       
       <div style={{ overflowX: 'auto', border: '1px solid #eaeaea', borderRadius: '8px' }}>
