@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { recentSignals } from '@/lib/signals';
+
+// Memoria temporanea integrata nell'endpoint
+let recentSignals = [];
 
 export async function GET() {
   return NextResponse.json(recentSignals, { status: 200 });
@@ -16,10 +18,8 @@ export async function POST(request) {
       price: body.price || 'N/A'
     };
 
-    // Aggiunge il nuovo segnale in cima alla lista
     recentSignals.unshift(signalItem);
 
-    // Mantiene solo gli ultimi 20 segnali
     if (recentSignals.length > 20) {
       recentSignals.pop();
     }
