@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Breakout & Bias Dashboard',
+  title: 'Siberiani',
   description: 'Monitoraggio segnali TradingView in tempo reale',
 };
 
