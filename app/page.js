@@ -7,10 +7,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchSignals = async () => {
       try {
-        const response = await fetch('/api/webhook');
+        const response = await fetch('/api/webhook', { cache: 'no-store' });
         const data = await response.json();
-        if (Array.isArray(data)) {
-          setSignalList(data);
+        if (Array.isArray(data.signals)) {
+          setSignalList(data.signals);
         }
       } catch (err) {
         console.error(err);
@@ -21,6 +21,17 @@ export default function Dashboard() {
     const intervalId = setInterval(fetchSignals, 5000);
     return () => clearInterval(intervalId);
   }, []);
+
+  const formatTime = (isoString) => {
+    if (!isoString) return '-';
+    const parsed = new Date(isoString);
+    if (Number.isNaN(parsed.getTime())) return '-';
+    return parsed.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  };
 
   return (
     <main style={{ padding: '1.5rem', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
@@ -44,8 +55,8 @@ export default function Dashboard() {
               </tr>
             ) : (
               signalList.map((item, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid #eaeaea' }}>
-                  <td style={{ padding: '12px 16px', color: '#333' }}>{item.time}</td>
+                <tr key={item.symbol + index} style={{ borderBottom: '1px solid #eaeaea' }}>
+                  <td style={{ padding: '12px 16px', color: '#333' }}>{formatTime(item.receivedAt)}</td>
                   <td style={{ padding: '12px 16px', fontWeight: '600' }}>{item.symbol}</td>
                   <td style={{ padding: '12px 16px', color: '#666' }}>{item.exchange}</td>
                   <td style={{ padding: '12px 16px', color: '#666' }}>{item.price}</td>
