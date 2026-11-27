@@ -1,37 +1,69 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-// Memoria temporanea integrata nell'endpoint
-let recentSignals = [];
+const globalScope = globalThis;
 
-export async function GET() {
-  return NextResponse.json(recentSignals, { status: 200 });
+if (!globalScope.recentSignals) {
+  globalScope.recentSignals = [];
+}
+if (!globalScope.lastSignalTime) {
+  globalScope.lastSignalTime = null;
 }
 
-export async function POST(request) {
+const batchGapMs = 10 * 60 * 1000;
+
+export async function POST(req) {
   try {
-    const body = await request.json();
-    
-    const signalItem = {
-      time: new Date().toLocaleTimeString(),
-      symbol: body.symbol || 'N/A',
-      exchange: body.exchange || 'N/A',
-      price: body.price || 'N/A'
-    };
+    const payload = await req.json();
+    const now = Date.now();
 
-    recentSignals.unshift(signalItem);
-
-    if (recentSignals.length > 20) {
-      recentSignals.pop();
+    if (
+      globalScope.lastSignalTime &&
+      now - globalScope.lastSignalTime > batchGapMs
+    ) {
+      globalScope.recentSignals = [];
     }
 
-    return NextResponse.json(
-      { status: 'success', message: 'Segnale salvato in memoria' }, 
-      { status: 200 }
+    globalScope.lastSignalTime = now;
+
+    const cleanSymbol = String(payload.symbol || "").trim();
+    const cleanExchange = String(payload.exchange || "").trim();
+    const cleanPrice = String(payload.price || "").trim();
+
+    if (!cleanSymbol) {
+      return NextResponse.json(
+        { error: "Missing symbol" },
+        { status: 400 }
+      );
+    }
+
+    const entry = {
+      symbol: cleanSymbol,
+      exchange: cleanExchange,
+      price: cleanPrice,
+      receivedAt: new Date(now).toISOString(),
+    };
+
+    const filtered = globalScope.recentSignals.filter(
+      (item) => item.symbol !== cleanSymbol
     );
-  } catch (error) {
+
+    globalScope.recentSignals = [entry, ...filtered].slice(0, 50);
+
+    return NextResponse.json({
+      ok: true,
+      total: globalScope.recentSignals.length,
+    });
+  } catch (err) {
     return NextResponse.json(
-      { status: 'error', message: error.message }, 
+      { error: "Invalid JSON body" },
       { status: 400 }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    signals: globalScope.recentSignals,
+    lastSignalTime: globalScope.lastSignalTime,
+  });
 }
