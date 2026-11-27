@@ -9,7 +9,7 @@ if (!globalScope.lastSignalTime) {
   globalScope.lastSignalTime = null;
 }
 
-const batchGapMs = 10 * 60 * 1000;
+const batchGapMs = 30 * 60 * 1000;
 
 export async function POST(req) {
   try {
